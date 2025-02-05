@@ -80,36 +80,40 @@
     </div>
 
     <script>
+        // Get URL parameters for animeId and episodeName
         const urlParams = new URLSearchParams(window.location.search);
         const animeId = urlParams.get('id');
         const episodeName = urlParams.get('ep');
 
-        // Fake API Data (Replace with actual API)
-        const animeData = {
-            animeId: "attack-on-titan",
-            episodes: [
-                { episodeName: "1", streamingLink: "https://example.com/ep1" },
-                { episodeName: "2", streamingLink: "https://example.com/ep2" }
-            ]
-        };
+        // The API URL
+        const apiUrl = 'https://fetch-manual-anime.vercel.app/';
 
-        // Load Episodes
-        const episodeList = document.getElementById("episode-list");
-        animeData.episodes.forEach(ep => {
-            let li = document.createElement("li");
-            li.innerHTML = `<a href="watch.html?id=${animeData.animeId}&ep=${ep.episodeName}" class="text-blue-400 hover:underline">Episode ${ep.episodeName}</a>`;
-            episodeList.appendChild(li);
-        });
+        // Fetch anime data
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                const anime = data.find(item => item.animeId === animeId);
 
-        // Load Episode Video
-        if (episodeName) {
-            const episode = animeData.episodes.find(ep => ep.episodeName === episodeName);
-            if (episode) {
-                document.getElementById("video-frame").src = episode.streamingLink;
-            }
-        } else {
-            document.getElementById("video-frame").src = animeData.episodes[0].streamingLink;
-        }
+                if (anime) {
+                    // Display the episode list
+                    const episodeList = document.getElementById('episode-list');
+                    anime.episodes.forEach(ep => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<a href="watch.html?id=${animeId}&ep=${ep.episodeName}" class="text-blue-400 hover:underline">Episode ${ep.episodeName}</a>`;
+                        episodeList.appendChild(li);
+                    });
+
+                    // Load episode video
+                    const episode = anime.episodes.find(ep => ep.episodeName === episodeName) || anime.episodes[0];
+                    document.getElementById('video-frame').src = episode.streamingLink;
+                } else {
+                    alert('Anime not found!');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                alert('Error fetching data');
+            });
 
         function changeServer(server) {
             alert("Switching to server " + server);
