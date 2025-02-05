@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Anime</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        ul li {
+            display: inline-block;
+            margin-right: 15px;
+        }
+        ul li a {
+            text-decoration: none;
+            background-color: #007bff;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+        ul li a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Watch Anime</h1>
+    <div id="anime-container">
+        <img id="anime-poster" src="" alt="Anime Poster">
+        <div id="episode-container"></div>
+    </div>
+
+    <div id="video-player">
+        <iframe id="video-frame" src="" frameborder="0"></iframe>
+    </div>
+
+    <h3>Episodes:</h3>
+    <ul id="episode-list">
+        <!-- Episode links will be inserted here by JavaScript -->
+    </ul>
+
+    <script>
+        // Get URL parameters for animeId and episodeName
+        const urlParams = new URLSearchParams(window.location.search);
+        const animeId = urlParams.get('id');
+        const episodeName = urlParams.get('ep');
+
+        // The API URL
+        const apiUrl = 'https://fetch-manual-anime.vercel.app/';
+
+        // Fetch the anime data from the API
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                // Find the anime by ID
+                const anime = data.find(item => item.animeId === animeId);
+
+                if (anime) {
+                    // Set the anime poster
+                    document.getElementById('anime-poster').src = anime.posterUrl;
+
+                    // Display the episode list
+                    const episodeList = document.getElementById('episode-list');
+                    anime.episodes.forEach(ep => {
+                        const episodeLink = document.createElement('li');
+                        const episodeAnchor = document.createElement('a');
+                        episodeAnchor.href = `watch.html?id=${animeId}&ep=${ep.episodeName}`;
+                        episodeAnchor.textContent = `Episode ${ep.episodeName}`;
+                        episodeLink.appendChild(episodeAnchor);
+                        episodeList.appendChild(episodeLink);
+                    });
+
+                    // If episodeName is provided, load the episode
+                    if (episodeName) {
+                        const episode = anime.episodes.find(ep => ep.episodeName === episodeName);
+                        if (episode) {
+                            // Set the video iframe to stream the episode
+                            document.getElementById('video-frame').src = episode.streamingLink;
+                        }
+                    } else {
+                        // If no episode name is provided, show the first episode
+                        const firstEpisode = anime.episodes[0];
+                        document.getElementById('video-frame').src = firstEpisode.streamingLink;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    </script>
+</body>
+</html>
