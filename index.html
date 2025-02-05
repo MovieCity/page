@@ -105,16 +105,21 @@
                         if (episode) {
                             // Set the video iframe to stream the episode
                             document.getElementById('video-frame').src = episode.streamingLink;
+                        } else {
+                            alert('Episode not found!');
                         }
                     } else {
                         // If no episode name is provided, show the first episode
                         const firstEpisode = anime.episodes[0];
                         document.getElementById('video-frame').src = firstEpisode.streamingLink;
                     }
+                } else {
+                    alert('Anime not found!');
                 }
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
+                alert('Error fetching data');
             });
     </script>
 </body>
